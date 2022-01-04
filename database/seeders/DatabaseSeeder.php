@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +16,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        $this->call(PlansSeeder::class);
+        $this->call(RolesSeeder::class);
+        if (app()->environment() != "production") {
+            $this->call(UsersSeeder::class);
+        }
     }
 }
