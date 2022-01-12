@@ -28,17 +28,18 @@ class AccountResource extends JsonResource
                 "state" => $this->contact->state,
                 "pincode" => $this->contact->pincode,
                 "created_by" => $this->contact->created_by,
-                "account" => $this->accountArray($this),
+                "account" => $this->accountArray(),
             ];
         } else {
             return
-                $this->accountArray($this);
+                $this->accountArray();
         }
     }
 
-    private function accountArray($request)
+    private function accountArray()
     {
         return [
+            "id" => $this->id,
             "account_id" => $this->registration_number,
             "status" => $this->status,
             "outstanding_payment" => $this->outstanding_payment,

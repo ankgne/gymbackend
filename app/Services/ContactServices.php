@@ -39,11 +39,12 @@ class ContactServices
     public static function customerByPhone($phoneNumber)
     {
         if ($phoneNumber) {
-            return Contact::with("account.subscriptions")
+            return Contact::with(["account.subscriptions", "account.bills"])
                 ->customer()
                 ->where("phone", $phoneNumber)
                 ->get();
         }
+        return null;
     }
 
     /***
