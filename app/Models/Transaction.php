@@ -57,13 +57,13 @@ class Transaction extends Model
     public function getTransactionModeAttribute($value)
     {
         switch ($value) {
-            case "0":
-                return "Cash";
             case "1":
-                return "Card";
+                return "Cash";
             case "2":
-                return "PayTM";
+                return "Card";
             case "3":
+                return "PayTM";
+            case "4":
                 return "GooglePay";
             default:
                 return "Others";

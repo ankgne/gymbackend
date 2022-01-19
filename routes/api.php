@@ -106,4 +106,8 @@ Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
             "show",
             "store",
         ]);
+        Route::get("/transactions/accountid/{accountID}", [
+            TransactionController::class,
+            "getTransactionsByAccountID",
+        ])->name("transactions.byaccountid");
     });

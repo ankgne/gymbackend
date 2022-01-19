@@ -5,22 +5,18 @@ namespace App\Http\Controllers\Member;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AccountResource;
 use App\Http\Resources\ContactResource;
-use App\Http\Resources\UserResource;
 use App\Jobs\ProcessAdditionalRegistrationSteps;
 use App\Models\Member\Account;
-use App\Models\Member\Contact;
 use App\Models\Member\Member;
 use App\Http\Requests\Member\StoreMemberRequest;
 use App\Http\Requests\Member\UpdateMemberRequest;
-use App\Models\User;
+use App\Models\Member\Subscription;
 use App\Services\AccountServices;
+use App\Services\BillingServices;
 use App\Services\ContactServices;
 use App\Services\Helper;
-use http\Message;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Auth;
+use App\Services\TransactionServices;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -40,7 +36,7 @@ class MemberController extends Controller
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\Member\StoreMemberRequest $request
-     * @return ContactResource
+     * @return AccountResource
      */
     public function store(StoreMemberRequest $request)
     {
@@ -53,14 +49,35 @@ class MemberController extends Controller
                 $account = AccountServices::createAccount($request, $contact);
                 // if account creation is successful then only process with dispatch request
                 if ($account->id) {
-                    ProcessAdditionalRegistrationSteps::dispatch(
-                        $request->all(),
-                        $account
+                    //                    ProcessAdditionalRegistrationSteps::dispatch(
+                    //                        $request->all(),
+                    //                        $account
+                    //                    );
+                    Subscription::create([
+                        "plan_id" => $request->plan_id,
+                        "account_id" => $account->id,
+                        "start_date" => $request->plan_start_date,
+                        "end_date" => $request->plan_end_date,
+                        "charge" => $request->plan_fee,
+                    ]);
+
+                    $bill = BillingServices::createUIBillingEntry(
+                        $request,
+                        $account->id
+                    );
+
+                    $transaction = TransactionServices::logUITransaction(
+                        $request,
+                        $account->id,
+                        $bill->id
+                    );
+                    $accountWithContactDetails = Account::with("contact")->find(
+                        $account->id
                     );
                 }
             }
             DB::commit();
-            return new ContactResource($contact);
+            return new AccountResource($accountWithContactDetails);
         } catch (\Exception $exception) {
             DB::rollback();
             return Helper::exceptionJSON($exception, 422, "Member");
@@ -134,12 +151,12 @@ class MemberController extends Controller
                 abort(
                     404,
                     "There is no members found for entered account number " .
-                    $registrationNumber
+                        $registrationNumber
                 );
             }
             return AccountResource::collection($member);
         } catch (Throwable $exception) {
-            return Helper::exceptionJSON($exception,404,"search");
+            return Helper::exceptionJSON($exception, 404, "search");
         }
     }
 
@@ -176,12 +193,12 @@ class MemberController extends Controller
                 abort(
                     404,
                     "There are no members found for entered phone number " .
-                    $phone_number
+                        $phone_number
                 );
             }
             return ContactResource::collection($members);
         } catch (Throwable $exception) {
-            return Helper::exceptionJSON($exception,404,"search");
+            return Helper::exceptionJSON($exception, 404, "search");
         }
     }
 
@@ -210,12 +227,12 @@ class MemberController extends Controller
                 abort(
                     404,
                     "There is no member found for entered email address " .
-                    $email
+                        $email
                 );
             }
             return ContactResource::collection($member);
         } catch (Throwable $exception) {
-            return Helper::exceptionJSON($exception,404,"search");
+            return Helper::exceptionJSON($exception, 404, "search");
         }
     }
 }

@@ -37,11 +37,11 @@ class BillingServices
 
     /**
      * Creates billing entry in database when a new customer is registered
-     * @param array $request
+     * @param $request
      * @param Account $account
      * @return mixed
      */
-    public static function createUIBillingEntry(array $request, $accountID)
+    public static function createUIBillingEntry($request, $accountID)
     {
         $todaysDate = Carbon::now()->toDateString();
         $billNumber = self::generateBillNumber();
@@ -57,9 +57,9 @@ class BillingServices
             "account_id" => $accountID,
             "status_code" => $billingStatusCode,
             "bill_issued_date" => $todaysDate,
-            "bill_due_date" => $request["due_date"],
-            "due_amount" => $request["pending_amount"],
-            "bill_amount" => $request["payable_amount"],
+            "bill_due_date" => $request->due_date,
+            "due_amount" => $request->pending_amount,
+            "bill_amount" => $request->payable_amount,
             "financial_year" => $finanicalYear,
         ]);
     }

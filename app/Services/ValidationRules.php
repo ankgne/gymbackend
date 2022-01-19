@@ -17,7 +17,7 @@ class ValidationRules
             "type" => "required|string|in:customer,prospect",
             "gender" => "required|string|in:male,female",
             "dob" => "required|date_format:m/d/Y",
-            "phone_number" => "required|integer",
+            "phone_number" => "required|string",
             "email" => "email|required|unique:customers,email",
             //            "email" => Rule::unique("customers")->where(function ($query) use (
             //                $phoneNumber
@@ -68,9 +68,9 @@ class ValidationRules
     {
         return [
             //validation rules for transaction table
-            "mode" => "required|integer|in:0,1,2,3,10",
+            "mode" => "required|integer|in:1,2,3,4,10",
             "transaction_type" => "required|integer|in:0,1",
-            "payment_amount" => "required|numeric|gt:0",
+            "payment_amount" => "required|numeric|gt:0|lte:payable_amount",
             "transaction_comment" => "required|string",
         ];
     }

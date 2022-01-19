@@ -6,12 +6,10 @@ use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
-use App\Services\AccountServices;
-use App\Services\BillingServices;
 use App\Services\Helper;
 use App\Services\TransactionServices;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class TransactionController extends Controller
 {
@@ -37,17 +35,62 @@ class TransactionController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($transactionType == 0) { //payment request
-                $transaction = TransactionServices::paymentTransaction($request);
-            } else { // TODO refund to be implemented
+            if ($transactionType == 0) {
+                //payment request
+                $transaction = TransactionServices::paymentTransaction(
+                    $request
+                );
+            } else {
+                // TODO refund to be implemented
                 abort(422, "Transaction not supported at the moment.");
             }
             DB::commit();
             return new TransactionResource(
-                Transaction::with(["bill", "account.contact"])->find($transaction->id)
+                Transaction::with(["bill", "account.contact"])->find(
+                    $transaction->id
+                )
             );
         } catch (\Exception $exception) {
             DB::rollback();
+            return Helper::exceptionJSON($exception, 422, "transaction");
+        }
+    }
+
+    /***
+     * Get traction details by account number
+     */
+    public function getTransactionsByAccountID($accountID)
+    {
+        $accountID = trim($accountID);
+        $input = [
+            "account_id" => $accountID,
+        ];
+        $rules = [
+            "account_id" => "required|integer|exists:accounts,id",
+        ];
+
+        Validator::make(
+            $input,
+            $rules,
+            $messages = [
+                "required" =>
+                    "The :attribute field is required for searching transactions",
+                "integer" => "The :attribute field should be a valid account.",
+            ]
+        )->validate();
+        try {
+            $transactions = Transaction::with([
+                "bill",
+                "account.contact",
+            ])->where("account_id", $accountID)->get();
+            if ($transactions->count() === 0) {
+                abort(
+                    404,
+                    "There are no transactions found for selected account "
+                );
+            }
+            return TransactionResource::collection($transactions);
+        } catch (\Exception $exception) {
             return Helper::exceptionJSON($exception, 422, "transaction");
         }
     }
@@ -73,8 +116,7 @@ class TransactionController extends Controller
     public function update(
         UpdateTransactionRequest $request,
         Transaction $transaction
-    )
-    {
+    ) {
         //
     }
 
