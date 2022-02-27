@@ -23,6 +23,7 @@ class Subscription extends Model
         "start_date",
         "end_date",
         "charge",
+        "status",
     ];
 
     /**
@@ -69,6 +70,53 @@ class Subscription extends Model
     public function plan()
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    /**
+     * Get the plan associated with the subscription.
+     */
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    /**
+     * Accessor for returning the status as active , inactive or suspended
+     * @param $value
+     * @return string
+     */
+    public function getStatusAttribute($value): string
+    {
+        switch ($value) {
+            case 0:
+                return "Closed";
+            case 1:
+                return "Active";
+            case 2:
+                return "Suspended";
+            case 3:
+                return "QueuedForUpdate";
+            case 4:
+                return "Inactive";
+            default:
+                return "Status Unknown";
+        }
+    }
+
+    /**
+     * Active Subscription
+     */
+    public function scopeActive($query)
+    {
+        return $query->where("status", 1);
+    }
+
+    /**
+     * Active Subscription
+     */
+    public function scopeQueue($query)
+    {
+        return $query->where("status", 3);
     }
 
 }

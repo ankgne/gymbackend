@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Member;
 
+use App\Services\ValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSubscriptionRequest extends FormRequest
@@ -13,7 +14,7 @@ class UpdateSubscriptionRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,8 +24,16 @@ class UpdateSubscriptionRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            //
+        // plan start date could be before today's date as we are not allowing on UI to edit start date of ongoing plan
+        $additionalSubscriptionRules = [
+            "plan_start_date" =>
+                "required|date_format:m/d/Y",
+            "account_id" => "required|integer|exists:accounts,id"
         ];
+
+        return array_merge(
+            ValidationRules::storeSubscriptionRules(),
+            $additionalSubscriptionRules
+        );
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Member;
 
+use App\Services\ValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateContactRequest extends FormRequest
 {
@@ -13,7 +15,7 @@ class UpdateContactRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,8 +25,17 @@ class UpdateContactRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            //
+        $additionalContactRules = [
+            "email" => [
+                "required",
+                "email",
+                Rule::unique("customers","email")->ignore($this->contact->id),
+            ],
         ];
+        $contactRules = array_merge(
+            ValidationRules::storeContactRules(),
+            $additionalContactRules
+        );
+        return $contactRules;
     }
 }

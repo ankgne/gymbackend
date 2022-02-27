@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\ValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePlanRequest extends FormRequest
@@ -13,7 +14,7 @@ class StorePlanRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,8 +24,6 @@ class StorePlanRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            //
-        ];
+        return ValidationRules::storePlanRules();
     }
 }

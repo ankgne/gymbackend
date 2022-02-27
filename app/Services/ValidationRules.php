@@ -71,7 +71,18 @@ class ValidationRules
             "mode" => "required|integer|in:1,2,3,4,10",
             "transaction_type" => "required|integer|in:0,1",
             "payment_amount" => "required|numeric|gt:0|lte:payable_amount",
+            "payable_amount" => "required|numeric|gt:0",
+            "pending_amount" => "required|numeric",
             "transaction_comment" => "required|string",
+        ];
+    }
+
+    public static function storePlanRules()
+    {
+        return [
+            "plan_label" => "required|string",
+            "plan_fee" => "required|numeric|gt:0",
+            "plan_validity" => "required|numeric|gte:30",
         ];
     }
 }

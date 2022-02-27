@@ -35,6 +35,8 @@ class CreateTransactionsTable extends Migration
             $table->integer("transaction_type");
             $table->date("transaction_date");
             $table->double("transaction_amount", 15, 4);
+            $table->double("due_amount_before_transaction", 15, 4);
+            $table->double("due_amount_after_transaction", 15, 4);
             $table->text("transaction_comment");
             $table->string("financial_year");
             $table->timestamps();

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
+
 class Helper
 {
     public static function exceptionJSON(\Exception $exception, int $statusCode, string $label)
@@ -15,5 +17,15 @@ class Helper
             ],
             $statusCode
         );
+    }
+
+    /**
+     * Returns today's date string
+     * @return string
+     */
+    public static function todaysDateString()
+    {
+        $todaysDate = Carbon::now();
+        return $todaysDate->toDateString();
     }
 }

@@ -9,6 +9,7 @@ use App\Http\Requests\Member\StoreContactRequest;
 use App\Http\Requests\Member\UpdateContactRequest;
 use App\Services\ContactServices;
 
+use App\Services\Helper;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -55,7 +56,12 @@ class ContactController extends Controller
      */
     public function update(UpdateContactRequest $request, Contact $contact)
     {
-        //
+        try {
+            $contact = ContactServices::updateContact($request, $contact);
+            return new ContactResource($contact);
+        } catch (\Exception $exception) {
+            return Helper::exceptionJSON($exception, 422, "Members");
+        }
     }
 
     /**
@@ -68,5 +74,4 @@ class ContactController extends Controller
     {
         //
     }
-
 }

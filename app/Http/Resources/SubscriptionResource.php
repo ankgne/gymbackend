@@ -18,6 +18,7 @@ class SubscriptionResource extends JsonResource
             "id" => $this->id,
             "plan_start_date" => $this->start_date,
             "plan_end_date" => $this->end_date,
+            "status" => $this->status,
             'plan' => new PlanResource($this->whenLoaded('plan'))
         ];
     }

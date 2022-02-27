@@ -23,12 +23,16 @@ class CreateBillingsTable extends Migration
             // 0 unpaid
             // 1 fully paid
             // 2 partial paid
+            $table
+                ->foreignId("plan_id") // plan ID is being stored so that we can determine what plan was going on at the time of bill generation
+                ->constrained("plans");
             $table->integer("status_code");
             $table->date("bill_issued_date");
             $table->date("bill_due_date");
-            $table->double("due_amount", 15, 4);
-            $table->double("bill_amount", 15, 4);
+            $table->double("prev_due_amount", 15, 4); // get the outstanding_payment from accounts table and in case of new registration it will zero
+            $table->double("bill_amount", 15, 4); // total amount - plan fees + previous outstanding amount
             $table->string("financial_year");
+            $table->string("billing_period"); //billing period (based on subscription start and end date) in billing table
             $table->timestamps();
         });
     }

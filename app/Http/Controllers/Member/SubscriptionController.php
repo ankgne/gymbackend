@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\SubscriptionResource;
 use App\Models\Member\Subscription;
 use App\Http\Requests\Member\StoreSubscriptionRequest;
 use App\Http\Requests\Member\UpdateSubscriptionRequest;
+use App\Services\Helper;
+use App\Services\SubscriptionServices;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class SubscriptionController extends Controller
 {
@@ -46,11 +50,33 @@ class SubscriptionController extends Controller
      *
      * @param  \App\Http\Requests\UpdateSubscriptionRequest  $request
      * @param  \App\Models\Member\Subscription  $subscription
-     * @return \Illuminate\Http\Response
+     * @return SubscriptionResource
      */
     public function update(UpdateSubscriptionRequest $request, Subscription $subscription)
     {
-        //
+        try {
+            $subscription = SubscriptionServices::updateSubscription($request, $subscription);
+            return new SubscriptionResource($subscription);
+        } catch (\Exception $exception) {
+            return Helper::exceptionJSON($exception, 422, "Subscription");
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \App\Http\Requests\UpdateSubscriptionRequest  $request
+     * @param  \App\Models\Member\Subscription  $subscription
+     * @return SubscriptionResource
+     */
+    public function queueSubscriptionChanges(UpdateSubscriptionRequest $request)
+    {
+        try {
+            $subscription = SubscriptionServices::queueSubscriptionChange($request);
+            return new SubscriptionResource($subscription);
+        } catch (\Exception $exception) {
+            return Helper::exceptionJSON($exception, 422, "Subscription");
+        }
     }
 
     /**

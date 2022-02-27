@@ -52,15 +52,19 @@ class BillingServices
             $request->payment_amount
         );
 
+        $billingPeriod = $request->plan_start_date . "-" . $request->plan_end_date;
+
         return Billing::create([
             "bill_number" => $billNumber,
             "account_id" => $accountID,
             "status_code" => $billingStatusCode,
             "bill_issued_date" => $todaysDate,
             "bill_due_date" => $request->due_date,
-            "due_amount" => $request->pending_amount,
             "bill_amount" => $request->payable_amount,
+            "prev_due_amount" => 0, // new registration there will be zero outstanding
+            "plan_id" => $request->plan_id, // plan id from request
             "financial_year" => $finanicalYear,
+            "billing_period" => $billingPeriod //billing period (based on subscription start and end date) in billing table
         ]);
     }
 
@@ -109,4 +113,21 @@ class BillingServices
             return 0; // default unpaid
         }
     } // generate an exception as this is case when more account is being paid than owed
+
+    /***
+     * Gets the bill by it's ID
+     * @param $id
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|null
+     */
+    public static function billById($id)
+    {
+        if ($id) {
+            //gets the plan ID associated with the bill generated
+            // note member can change its plan hence always plan ID associated with bill
+            return Billing::with(["plan", "account.contact"])
+                ->where("id", $id)
+                ->get();
+        }
+        return null;
+    }
 }

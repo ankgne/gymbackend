@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Member;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AccountResource;
 use App\Http\Resources\ContactResource;
+use App\Http\Resources\MemberListResource;
 use App\Jobs\ProcessAdditionalRegistrationSteps;
 use App\Models\Member\Account;
 use App\Models\Member\Member;
@@ -15,6 +16,7 @@ use App\Services\AccountServices;
 use App\Services\BillingServices;
 use App\Services\ContactServices;
 use App\Services\Helper;
+use App\Services\SubscriptionServices;
 use App\Services\TransactionServices;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -25,11 +27,22 @@ class MemberController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        //
+        try {
+            $members = ContactServices::getCustomers();
+            if ($members->count() === 0) {
+                abort(
+                    404,
+                    "There are no members found"
+                );
+            }
+            return ContactResource::collection($members);
+        } catch (\Exception $exception) {
+            return Helper::exceptionJSON($exception, 422, "Members");
+        }
     }
 
     /**
@@ -53,13 +66,10 @@ class MemberController extends Controller
                     //                        $request->all(),
                     //                        $account
                     //                    );
-                    Subscription::create([
-                        "plan_id" => $request->plan_id,
-                        "account_id" => $account->id,
-                        "start_date" => $request->plan_start_date,
-                        "end_date" => $request->plan_end_date,
-                        "charge" => $request->plan_fee,
-                    ]);
+                    SubscriptionServices::createSubscription(
+                        $request,
+                        $account
+                    );
 
                     $bill = BillingServices::createUIBillingEntry(
                         $request,
@@ -87,19 +97,31 @@ class MemberController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Models\Member\Member $member
-     * @return \Illuminate\Http\Response
+     * @param Member $member
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function show(Member $member)
+    public function show($id)
     {
-        //
+        try {
+            $members = ContactServices::customerByID($id);
+            if ($members->count() === 0) {
+                abort(
+                    404,
+                    "No records found for entered id " .
+                    $id
+                );
+            }
+            return ContactResource::collection($members);
+        } catch (Throwable $exception) {
+            return Helper::exceptionJSON($exception, 404, "search");
+        }
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param \App\Http\Requests\Member\UpdateMemberRequest $request
-     * @param \App\Models\Member\Member $member
+     * @param Member $member
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateMemberRequest $request, Member $member)
@@ -110,7 +132,7 @@ class MemberController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Models\Member\Member $member
+     * @param Member $member
      * @return \Illuminate\Http\Response
      */
     public function destroy(Member $member)
@@ -235,4 +257,89 @@ class MemberController extends Controller
             return Helper::exceptionJSON($exception, 404, "search");
         }
     }
+
+    /**
+     * Get all active members
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function activeMembersList()
+    {
+        try {
+            // single member will be fetched as we are storing unique email address
+            $members = AccountServices::getActiveCustomers();
+            if ($members->count() === 0) {
+                abort(
+                    404,
+                    "There are no active members"
+                );
+            }
+            return AccountResource::collection($members);
+        } catch (Throwable $exception) {
+            return Helper::exceptionJSON($exception, 404, "index");
+        }
+    }
+
+    /**
+     * Get all active members
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function getActiveCustomersWithUpcomingDueDate()
+    {
+        try {
+            // single member will be fetched as we are storing unique email address
+            $members = AccountServices::getActiveCustomersWithUpcomingDueDate();
+            if ($members->count() === 0) {
+                abort(
+                    404,
+                    "There are no members with outstanding payment"
+                );
+            }
+            return AccountResource::collection($members);
+        } catch (Throwable $exception) {
+            return Helper::exceptionJSON($exception, 404, "index");
+        }
+    }
+
+    /**
+     * Get all active members
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function inactiveMembersList()
+    {
+        try {
+            // single member will be fetched as we are storing unique email address
+            $members = AccountServices::getInactiveCustomers();
+            if ($members->count() === 0) {
+                abort(
+                    404,
+                    "There are no inactive members"
+                );
+            }
+            return AccountResource::collection($members);
+        } catch (Throwable $exception) {
+            return Helper::exceptionJSON($exception, 404, "index");
+        }
+    }
+
+    /**
+     * Get all suspended members
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function suspendedCustomers()
+    {
+        try {
+            // single member will be fetched as we are storing unique email address
+            $members = AccountServices::getSuspendedCustomers();
+            if ($members->count() === 0) {
+                abort(
+                    404,
+                    "There are no suspended members"
+                );
+            }
+            return AccountResource::collection($members);
+        } catch (Throwable $exception) {
+            return Helper::exceptionJSON($exception, 404, "index");
+        }
+    }
+
 }

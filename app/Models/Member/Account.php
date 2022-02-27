@@ -19,6 +19,7 @@ class Account extends Model
         "due_date",
         "outstanding_payment",
         "financial_year",
+        "status"
     ];
 
     /**
@@ -67,6 +68,22 @@ class Account extends Model
             default:
                 return "Status Unknown";
         }
+    }
+
+    /**
+     * Active members
+     */
+    public function scopeActive($query)
+    {
+        return $query->where("status", 1);
+    }
+
+    /**
+     * Inactive members
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where("status", 0);
     }
 
     /**

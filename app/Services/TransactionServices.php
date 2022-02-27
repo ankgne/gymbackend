@@ -77,6 +77,8 @@ class TransactionServices
             "transaction_type" => $request->transaction_type,
             "transaction_date" => $todaysDate,
             "transaction_amount" => $request->payment_amount,
+            "due_amount_before_transaction" => $request->payable_amount,
+            "due_amount_after_transaction" => $request->pending_amount,
             "transaction_comment" => $transactionComment,
             "financial_year" => $finanicalYear,
         ]);
@@ -87,7 +89,7 @@ class TransactionServices
         $accountID = $request->account_id;
         $billID = $request->bill_id;
         $transaction = TransactionServices::logUITransaction(
-            $request->toArray(),
+            $request,
             $accountID,
             $billID,
             true

@@ -3,7 +3,10 @@
 use App\Http\Controllers\Member\AccountController;
 use App\Http\Controllers\Member\ContactController;
 use App\Http\Controllers\Member\MemberController;
+use App\Http\Controllers\Member\PlanController;
+use App\Http\Controllers\Member\SubscriptionController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\BillingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -67,6 +70,22 @@ Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
     ->prefix("admin")
     ->name("admin.")
     ->group(function () {
+        Route::get("/members/active", [
+            MemberController::class,
+            "activeMembersList",
+        ])->name("members.active");
+        Route::get("/members/inactive", [
+            MemberController::class,
+            "inactiveMembersList",
+        ])->name("members.inactive");
+        Route::get("/members/active/upcoming_due_date", [
+            MemberController::class,
+            "getActiveCustomersWithUpcomingDueDate",
+        ])->name("members.active.upcomingduedate");
+        Route::get("/members/suspended", [
+            MemberController::class,
+            "suspendedCustomers",
+        ])->name("members.suspended");
         Route::apiResource("members", MemberController::class);
     });
 
@@ -110,4 +129,70 @@ Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
             TransactionController::class,
             "getTransactionsByAccountID",
         ])->name("transactions.byaccountid");
+    });
+
+// Subscription controller
+Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
+    ->prefix("admin")
+    ->name("admin.")
+    ->group(function () {
+        Route::apiResource(
+            "subscriptions",
+            SubscriptionController::class
+        )->only(["update"]);
+        Route::post("/subscriptions/queue", [
+            SubscriptionController::class,
+            "queueSubscriptionChanges",
+        ])->name("subscription.queue");
+    });
+
+// account controlled
+Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
+    ->prefix("admin")
+    ->name("admin.")
+    ->group(function () {
+        Route::put("/accounts/deactivate/{id}", [
+            AccountController::class,
+            "inactive",
+        ])->name("accounts.inactive");
+        Route::put("/accounts/activate/{id}", [
+            AccountController::class,
+            "active",
+        ])->name("accounts.active");
+    });
+
+// Billing controller
+Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
+    ->prefix("admin")
+    ->name("admin.")
+    ->group(function () {
+        Route::apiResource("bills", BillingController::class)->only(["show"]);
+        Route::get("/bills/accountid/{accountID}", [
+            BillingController::class,
+            "getInvoicesByAccountID",
+        ])->name("bills.byaccountid");
+    });
+
+// Plan controller
+Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
+    ->prefix("admin")
+    ->name("admin.")
+    ->group(function () {
+        Route::apiResource("plans", PlanController::class)->only([
+            "index",
+            "store",
+            "update",
+        ]);
+        Route::get("/plans/active", [
+            PlanController::class,
+            "getActivePlans",
+        ])->name("plans.active");
+        Route::put("/plans/activate/{plan}", [
+            PlanController::class,
+            "activatePlan",
+        ])->name("plans.activate");
+        Route::put("/plans/deactivate/{plan}", [
+            PlanController::class,
+            "deactivatePlan",
+        ])->name("plans.deactivate");
     });

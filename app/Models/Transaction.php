@@ -26,6 +26,8 @@ class Transaction extends Model
         "transaction_amount",
         "transaction_comment",
         "financial_year",
+        "due_amount_before_transaction",
+        "due_amount_after_transaction"
     ];
 
     /**

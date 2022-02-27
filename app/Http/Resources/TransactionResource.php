@@ -21,6 +21,8 @@ class TransactionResource extends JsonResource
             "transaction_date" => $this->transaction_date,
             "transaction_amount" => $this->transaction_amount,
             "transaction_comment" => $this->transaction_comment,
+            "due_amount_before_transaction" => $this->due_amount_before_transaction,
+            "due_amount_after_transaction" => $this->due_amount_after_transaction,
             'bill' => new BillingResource($this->whenLoaded('bill')),
             'contact' => new AccountResource($this->whenLoaded('account')),
         ];

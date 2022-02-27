@@ -64,7 +64,9 @@ class AccountServices
         if ($registrationNumber) {
             return Account::with([
                 "contact",
-                "subscriptions",
+                "subscriptions" => function ($query) {
+                    $query->active()->latest();
+                },
                 "bills" => function ($query) {
                     $query->latest()->first();
                 },
@@ -89,8 +91,118 @@ class AccountServices
         $account = Account::findOrFail($id);
         $account->outstanding_payment =
             $request->payable_amount - $request->payment_amount;
-        if ($account->outstanding_payment < 0)
+        if ($account->outstanding_payment < 0) {
             abort(422, "Payment amount is more than payable amount.");
+        }
         $account->save();
+    }
+
+    /**
+     * Returns the list of all active customers
+     */
+    public static function getActiveCustomers()
+    {
+        return Account::with([
+            "contact" => function ($query) {
+                $query->customer();
+            },
+            "subscriptions" => function ($query) {
+                $query->active()->latest();
+            },
+            //            "bills" => function ($query) {
+            //                $query->latest()->first();
+            //            },
+        ])
+            ->active()
+            ->get();
+    }
+
+    /**
+     * Returns the list of all active customers
+     */
+    public static function getInactiveCustomers()
+    {
+        return Account::with([
+            "contact" => function ($query) {
+                $query->customer();
+            },
+            "subscriptions" => function ($query) {
+                $query->active()->latest();
+            },
+            //            "bills" => function ($query) {
+            //                $query->latest()->first();
+            //            },
+        ])
+            ->inactive()
+            ->get();
+    }
+
+    /**
+     * Returns the list of all active customers who have outstanding payment
+     */
+    public static function getActiveCustomersWithUpcomingDueDate()
+    {
+        return Account::with([
+            "contact" => function ($query) {
+                $query->customer();
+            },
+            "subscriptions" => function ($query) {
+                $query->active()->latest();
+            },
+            //            "bills" => function ($query) {
+            //                $query->latest()->first();
+            //            },
+        ])
+            ->active()
+            ->where("outstanding_payment", ">", 0)
+            ->where("due_date", ">", today())
+            ->get();
+    }
+
+    /**
+     * Returns the list of all active customers who have outstanding payment
+     */
+    public static function getSuspendedCustomers()
+    {
+        return Account::with([
+            "contact" => function ($query) {
+                $query->customer();
+            },
+            "subscriptions" => function ($query) {
+                $query->active()->latest();
+            },
+//            "bills" => function ($query) {
+//                $query->latest()->first();
+//            },
+        ])
+            ->active()
+            ->where("status", 2)
+            ->get();
+    }
+
+    /**
+     * Inactive account
+     */
+    public static function inactiveAccount($id)
+    {
+        $account = Account::with("contact")->findOrFail($id);
+        if ($account->update(["status" => 0])) {
+            return $account;
+        }
+        abort(422, "Failed to change status of account");
+    }
+
+    /**
+     * Activate account
+     */
+    public static function activateAccount($id)
+    {
+        $account = Account::with("contact")->findOrFail($id);
+        if ($account->update(["status" => 1])) {
+            return $account;
+        }
+        abort(422, "Failed to change status of account");
+        //        $account->status = 1;
+        //        $account->save();
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Member\Account;
+use App\Models\Member\Plan;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,9 +24,11 @@ class Billing extends Model
         "status_code",
         "bill_issued_date",
         "bill_due_date",
-        "due_amount",
         "bill_amount",
         "financial_year",
+        "plan_id",
+        "prev_due_amount",
+        "billing_period"
     ];
 
     /**
@@ -91,5 +95,17 @@ class Billing extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class, 'bill_id');
+    }
+
+    /**
+     * Get the plan associated with the subscription.
+     */
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
+    public function account(){
+        return $this->belongsTo(Account::class);
     }
 }

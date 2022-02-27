@@ -30,6 +30,8 @@ class CreateSubscriptionsTable extends Migration
             // 0 closed - closed by member
             // 1 active
             // 2 suspended - due to non-payment
+            // 3 queued for change
+            // 4 inactive - when an old subscription is changed to new then it is made inactive
             $table->integer("status")->default(1);
             $table->timestamps();
         });
