@@ -3,6 +3,7 @@
 namespace App\Models\Member;
 
 
+use App\Models\Attendance;
 use App\Models\Billing;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -116,5 +117,13 @@ class Account extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class,"account_id");
+    }
+
+    /**
+     * Get the attendance associated with the account.
+     */
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class,"account_id");
     }
 }

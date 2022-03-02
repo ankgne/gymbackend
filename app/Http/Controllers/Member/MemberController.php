@@ -280,18 +280,37 @@ class MemberController extends Controller
     }
 
     /**
-     * Get all active members
+     * Get all active members with upcoming due date
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function getActiveCustomersWithUpcomingDueDate()
+    public function getActiveCustomersWithUpcomingDueDate(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         try {
-            // single member will be fetched as we are storing unique email address
             $members = AccountServices::getActiveCustomersWithUpcomingDueDate();
             if ($members->count() === 0) {
                 abort(
                     404,
                     "There are no members with outstanding payment"
+                );
+            }
+            return AccountResource::collection($members);
+        } catch (Throwable $exception) {
+            return Helper::exceptionJSON($exception, 404, "index");
+        }
+    }
+
+    /**
+     * Get all active members with over due date
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function getActiveCustomersWithOverDueDate()
+    {
+        try {
+            $members = AccountServices::getActiveCustomersWithOverDueDate();
+            if ($members->count() === 0) {
+                abort(
+                    404,
+                    "There are no members with over due payment date"
                 );
             }
             return AccountResource::collection($members);

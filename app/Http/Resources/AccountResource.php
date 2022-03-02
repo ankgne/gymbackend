@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Attendance;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AccountResource extends JsonResource
@@ -53,6 +54,9 @@ class AccountResource extends JsonResource
             ),
             "transactions" => TransactionResource::collection(
                 $this->whenLoaded("transactions")
+            ),
+            "attendances" => AttendanceResource::collection(
+                $this->whenLoaded("attendances")
             ),
         ];
     }

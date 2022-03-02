@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateAttendanceTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('attendance', function (Blueprint $table) {
+            $table->id();
+            $table
+                ->foreignId("account_id")
+                ->constrained("accounts");
+            $table->date("attendance_date");
+            $table->time("in_time")->nullable();
+            $table->time("out_time")->nullable();
+            $table->string("duration")->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('attendance');
+    }
+}

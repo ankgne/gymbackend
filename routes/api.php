@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Member\AccountController;
 use App\Http\Controllers\Member\ContactController;
 use App\Http\Controllers\Member\MemberController;
@@ -82,6 +83,10 @@ Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
             MemberController::class,
             "getActiveCustomersWithUpcomingDueDate",
         ])->name("members.active.upcomingduedate");
+        Route::get("/members/active/over_due_date", [
+            MemberController::class,
+            "getActiveCustomersWithOverDueDate",
+        ])->name("members.active.overduedate");
         Route::get("/members/suspended", [
             MemberController::class,
             "suspendedCustomers",
@@ -195,4 +200,19 @@ Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
             PlanController::class,
             "deactivatePlan",
         ])->name("plans.deactivate");
+    });
+
+// attendnace controller
+Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
+    ->prefix("admin")
+    ->name("admin.")
+    ->group(function () {
+        Route::apiResource("attendance", AttendanceController::class)->only([
+            "index",
+            "store",
+        ]);
+        Route::put("/attendance/outtime", [
+            AttendanceController::class,
+            "captureOutTime",
+        ])->name("attendance.captureouttime");
     });

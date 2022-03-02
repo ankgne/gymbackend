@@ -153,9 +153,26 @@ class AccountServices
             //                $query->latest()->first();
             //            },
         ])
-            ->active()
             ->where("outstanding_payment", ">", 0)
             ->where("due_date", ">", today())
+            ->get();
+    }
+
+    /**
+     * Returns the list of all active customers who have outstanding payment
+     */
+    public static function getActiveCustomersWithOverDueDate()
+    {
+        return Account::with([
+            "contact" => function ($query) {
+                $query->customer();
+            },
+            "subscriptions" => function ($query) {
+                $query->active()->latest();
+            },
+        ])
+            ->where("outstanding_payment", ">", 0)
+            ->where("due_date", "<", today()) // due date is passed
             ->get();
     }
 
@@ -175,7 +192,6 @@ class AccountServices
 //                $query->latest()->first();
 //            },
         ])
-            ->active()
             ->where("status", 2)
             ->get();
     }

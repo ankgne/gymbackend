@@ -125,6 +125,13 @@ class GenerateInvoice
         $subscription = Subscription::findOrFail($subscription->id);
         $subscriptionValidity = $subscription->plan->validity;
 
+        self::$commandObject->info(
+            "Start and end date of Ongoing subscription " .
+                $subscription->start_date .
+                " - " .
+                $subscription->end_date
+        );
+
         $newStartDate = Carbon::parse($subscription->end_date)->addDays(1);
         $subscription->start_date = $newStartDate;
 
@@ -132,6 +139,13 @@ class GenerateInvoice
             $subscriptionValidity
         );
         $subscription->end_date = $newEndDate;
+
+        self::$commandObject->info(
+            "Start and end date of extended subscription " .
+                $subscription->start_date .
+                " - " .
+                $subscription->end_date
+        );
 
         $subscription->save();
 
@@ -251,6 +265,7 @@ class GenerateInvoice
                 "Updating ongoing subscription with queued subscription details for " .
                     $subscription["account"]["registration_number"]
             );
+
             //get the active , latest and first subscription.
             // As of now, customer can have one active subscription at a time but then also we are picking latest and first
             $ongoingSubscription = Subscription::where("account_id", $account)
@@ -258,13 +273,28 @@ class GenerateInvoice
                 ->latest()
                 ->first();
 
+            self::$commandObject->info(
+                "Start and end date of Ongoing subscription " .
+                    $ongoingSubscription->start_date .
+                    " - " .
+                    $ongoingSubscription->end_date
+            );
+
             $ongoingSubscription->status = 4;
             //            $ongoingSubscription->plan_id = $queuedSubscription->plan_id;
             //            $ongoingSubscription->start_date = $queuedSubscription->start_date;
             //            $ongoingSubscription->end_date = $queuedSubscription->end_date;
             //            $ongoingSubscription->charge = $queuedSubscription->charge;
             $ongoingSubscription->save();
+
             //make the queue subscription as active
+            self::$commandObject->info(
+                "Start and end date of queued/new subscription " .
+                    $queuedSubscription->start_date .
+                    " - " .
+                    $queuedSubscription->end_date
+            );
+
             $queuedSubscription->status = 1;
             $queuedSubscription->save();
             self::$commandObject->info(
