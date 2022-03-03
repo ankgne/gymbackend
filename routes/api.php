@@ -215,4 +215,8 @@ Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
             AttendanceController::class,
             "captureOutTime",
         ])->name("attendance.captureouttime");
+        Route::get("/attendance/todays", [
+            AttendanceController::class,
+            "attendanceForToday",
+        ])->name("attendance.attendanceForToday");
     });

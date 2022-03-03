@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Attendance;
 use App\Models\Member\Account;
+use Carbon\Carbon;
 
 class AttendanceService
 {
@@ -95,5 +96,22 @@ class AttendanceService
         ])
             ->active()
             ->get();
+    }
+
+    public static function attedanceForToday()
+    {
+        $date = Helper::todaysDateString();
+        $count = Attendance::query()
+            ->where("attendance_date", $date)
+            ->count();
+
+        return response()->json(
+            [
+                "attendance_count" =>
+                    $count,
+                "date" =>
+                    Carbon::parse($date)->format("m/d/Y"),
+            ]
+        );
     }
 }

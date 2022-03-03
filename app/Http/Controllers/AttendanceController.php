@@ -119,4 +119,18 @@ class AttendanceController extends Controller
     {
         //
     }
+
+    /**
+     * Get count for today
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function attendanceForToday()
+    {
+        try {
+            return AttendanceService::attedanceForToday();
+        } catch (\Exception $exception) {
+            return Helper::exceptionJSON($exception, 422, "attendance");
+        }
+    }
 }
