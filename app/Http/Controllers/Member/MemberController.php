@@ -283,7 +283,7 @@ class MemberController extends Controller
      * Get all active members with upcoming due date
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function getActiveCustomersWithUpcomingDueDate(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function getActiveCustomersWithUpcomingDueDate()
     {
         try {
             $members = AccountServices::getActiveCustomersWithUpcomingDueDate();
