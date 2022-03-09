@@ -2,6 +2,7 @@
 
 namespace App\Actions\Billing;
 
+use App\Mail\BillGenerated;
 use App\Models\Billing;
 use App\Models\Member\Account;
 use App\Models\Member\Subscription;
@@ -11,6 +12,7 @@ use App\Services\Helper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class GenerateInvoice
 {
@@ -29,7 +31,7 @@ class GenerateInvoice
             $searchDate = Carbon::parse($billGenerationDate)->format("Y-m-d");
         }
 
-        return Subscription::with("account")
+        return Subscription::with("account.contact")
             ->whereHas("account", function (Builder $query) {
                 $query->active();
             })
@@ -219,6 +221,14 @@ class GenerateInvoice
 
                 //update outstanding amount in account's table with new billed amount
                 self::updateOutstandingPayment($bill);
+                self::$commandObject->info(
+                    "Queuing email delivery for " .
+                    $subscription["account"]["contact"]["email"]
+                );
+                Mail::to($subscription["account"]["contact"]["email"])
+                    ->send(
+                        new BillGenerated( $subscription["account"]["id"], $bill, $updatedSubscription)
+                    );
 
                 self::$commandObject->newLine(1);
                 DB::commit();

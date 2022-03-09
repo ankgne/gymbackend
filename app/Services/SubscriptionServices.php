@@ -11,7 +11,7 @@ class SubscriptionServices
      */
     public static function createSubscription($request, $account)
     {
-        Subscription::create([
+        return Subscription::create([
             "plan_id" => $request->plan_id,
             "account_id" => $account->id,
             "start_date" => $request->plan_start_date,

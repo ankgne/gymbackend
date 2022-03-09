@@ -7,6 +7,7 @@ use App\Http\Resources\AccountResource;
 use App\Http\Resources\ContactResource;
 use App\Http\Resources\MemberListResource;
 use App\Jobs\ProcessAdditionalRegistrationSteps;
+use App\Mail\MemberRegistered;
 use App\Models\Member\Account;
 use App\Models\Member\Member;
 use App\Http\Requests\Member\StoreMemberRequest;
@@ -15,10 +16,12 @@ use App\Models\Member\Subscription;
 use App\Services\AccountServices;
 use App\Services\BillingServices;
 use App\Services\ContactServices;
+use App\Services\EmailServices;
 use App\Services\Helper;
 use App\Services\SubscriptionServices;
 use App\Services\TransactionServices;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -34,10 +37,7 @@ class MemberController extends Controller
         try {
             $members = ContactServices::getCustomers();
             if ($members->count() === 0) {
-                abort(
-                    404,
-                    "There are no members found"
-                );
+                abort(404, "There are no members found");
             }
             return ContactResource::collection($members);
         } catch (\Exception $exception) {
@@ -66,7 +66,7 @@ class MemberController extends Controller
                     //                        $request->all(),
                     //                        $account
                     //                    );
-                    SubscriptionServices::createSubscription(
+                    $subscription = SubscriptionServices::createSubscription(
                         $request,
                         $account
                     );
@@ -84,6 +84,18 @@ class MemberController extends Controller
                     $accountWithContactDetails = Account::with("contact")->find(
                         $account->id
                     );
+
+                    // send email on registration
+                    if (
+                        $subscription &&
+                        $transaction &&
+                        $accountWithContactDetails
+                    ) {
+                        Mail::to($request->email)
+                            ->send(
+                                new MemberRegistered($account->id)
+                            );
+                    }
                 }
             }
             DB::commit();
@@ -105,11 +117,7 @@ class MemberController extends Controller
         try {
             $members = ContactServices::customerByID($id);
             if ($members->count() === 0) {
-                abort(
-                    404,
-                    "No records found for entered id " .
-                    $id
-                );
+                abort(404, "No records found for entered id " . $id);
             }
             return ContactResource::collection($members);
         } catch (Throwable $exception) {
@@ -268,10 +276,7 @@ class MemberController extends Controller
             // single member will be fetched as we are storing unique email address
             $members = AccountServices::getActiveCustomers();
             if ($members->count() === 0) {
-                abort(
-                    404,
-                    "There are no active members"
-                );
+                abort(404, "There are no active members");
             }
             return AccountResource::collection($members);
         } catch (Throwable $exception) {
@@ -288,10 +293,7 @@ class MemberController extends Controller
         try {
             $members = AccountServices::getActiveCustomersWithUpcomingDueDate();
             if ($members->count() === 0) {
-                abort(
-                    404,
-                    "There are no members with outstanding payment"
-                );
+                abort(404, "There are no members with outstanding payment");
             }
             return AccountResource::collection($members);
         } catch (Throwable $exception) {
@@ -308,10 +310,7 @@ class MemberController extends Controller
         try {
             $members = AccountServices::getActiveCustomersWithOverDueDate();
             if ($members->count() === 0) {
-                abort(
-                    404,
-                    "There are no members with over due payment date"
-                );
+                abort(404, "There are no members with over due payment date");
             }
             return AccountResource::collection($members);
         } catch (Throwable $exception) {
@@ -329,10 +328,7 @@ class MemberController extends Controller
             // single member will be fetched as we are storing unique email address
             $members = AccountServices::getInactiveCustomers();
             if ($members->count() === 0) {
-                abort(
-                    404,
-                    "There are no inactive members"
-                );
+                abort(404, "There are no inactive members");
             }
             return AccountResource::collection($members);
         } catch (Throwable $exception) {
@@ -350,15 +346,11 @@ class MemberController extends Controller
             // single member will be fetched as we are storing unique email address
             $members = AccountServices::getSuspendedCustomers();
             if ($members->count() === 0) {
-                abort(
-                    404,
-                    "There are no suspended members"
-                );
+                abort(404, "There are no suspended members");
             }
             return AccountResource::collection($members);
         } catch (Throwable $exception) {
             return Helper::exceptionJSON($exception, 404, "index");
         }
     }
-
 }
