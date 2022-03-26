@@ -3,11 +3,16 @@
 namespace App\Models\Member;
 
 use Carbon\Carbon;
+use Database\Factories\Member\SubscriptionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Subscription extends Model
 {
+    protected static function newFactory()
+    {
+        return SubscriptionFactory::new();
+    }
     use HasFactory;
 
     /**

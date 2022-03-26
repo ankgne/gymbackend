@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Member\Account;
 use App\Models\Member\Plan;
 use Carbon\Carbon;
+use Database\Factories\Member\BillingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Billing extends Model
 {
     use HasFactory;
+
+    protected static function newFactory()
+    {
+        return BillingFactory::new();
+    }
 
     /**
      * Attributes that should be mass-assignable.

@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesSeeder::class);
         if (app()->environment() != "production") {
             $this->call(UsersSeeder::class);
+            $this->call(ContactsSeeder::class);
         }
     }
 }

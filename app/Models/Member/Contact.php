@@ -4,12 +4,18 @@ namespace App\Models\Member;
 
 use App\Models\User;
 use Carbon\Carbon;
+use Database\Factories\Member\ContactFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Contact extends Model
 {
     use HasFactory;
+
+    protected static function newFactory()
+    {
+        return ContactFactory::new();
+    }
 
     protected $table = "customers";
 

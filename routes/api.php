@@ -220,3 +220,34 @@ Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
             "attendanceForToday",
         ])->name("attendance.attendanceForToday");
     });
+
+// Dashboard controller
+Route::middleware(["auth:" . config("fortify.guard"), "owner.admin"])
+    ->prefix("admin")
+    ->name("admin.")
+    ->group(function () {
+        Route::get("/dashboard/attendance/sixmonths", [
+            \App\Http\Controllers\DashboardController::class,
+            "getSixMonthsAttendance",
+        ])->name("dashboard.attendanceSixMonths");
+        Route::get("/dashboard/attendance/sevendays", [
+            \App\Http\Controllers\DashboardController::class,
+            "getSevenDaysAttendance",
+        ])->name("dashboard.attendanceSevenDays");
+        Route::get("/dashboard/newusers/monthly/count", [
+            \App\Http\Controllers\DashboardController::class,
+            "getNewUsersCount",
+        ])->name("dashboard.newusers.monthly.count");
+        Route::get("/dashboard/active/users/count", [
+            \App\Http\Controllers\DashboardController::class,
+            "getActiveUsersCount",
+        ])->name("dashboard.active.users.count");
+        Route::get("/dashboard/monthly/revenue", [
+            \App\Http\Controllers\DashboardController::class,
+            "getMonthlyTotalRevenue",
+        ])->name("dashboard.monthly.revenue");
+        Route::get("/dashboard/currentmonth/paymentdue", [
+            \App\Http\Controllers\DashboardController::class,
+            "getCurrentMonthPaymentDue",
+        ])->name("dashboard.currentmonth.paymentdue");
+    });

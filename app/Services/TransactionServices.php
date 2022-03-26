@@ -52,7 +52,7 @@ class TransactionServices
      * @param Billing $bill
      * @return mixed
      */
-    public static function logUITransaction(
+    public static function  logUITransaction(
         $request,
         $accountID,
         $billID,

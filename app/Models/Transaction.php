@@ -4,11 +4,17 @@ namespace App\Models;
 
 use App\Models\Member\Account;
 use Carbon\Carbon;
+use Database\Factories\Member\TransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
+    protected static function newFactory()
+    {
+        return TransactionFactory::new();
+    }
+
     use HasFactory;
 
     /**

@@ -7,12 +7,18 @@ use App\Models\Attendance;
 use App\Models\Billing;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Database\Factories\Member\AccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Account extends Model
 {
     use HasFactory;
+
+    protected static function newFactory()
+    {
+        return AccountFactory::new();
+    }
 
     protected $fillable = [
         "registration_number",
