@@ -27,7 +27,7 @@ class ContactFactory extends Factory
             "type" => 'customer',
             "gender" => $this->faker->randomElement(['male', 'female']),
             "dob" => $this->faker->date('m/d/Y'),
-            "phone" => $this->faker->randomNumber(9,true),
+            "phone" => $this->faker->numerify('##########'),
             "email" => $this->faker->unique()->safeEmail(),
             "address" => $this->faker->address(),
             "city" => $this->faker->city(),

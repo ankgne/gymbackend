@@ -39,7 +39,7 @@ class UsersSeeder extends Seeder
         ])->attachRole($member);
 
         User::create([
-            "email" => "ankgne@gmail.com",
+            "email" => "admin@gmail.com",
             "name" => "admin",
             "password" => Hash::make("secret123"),
         ])->attachRole($admin);
